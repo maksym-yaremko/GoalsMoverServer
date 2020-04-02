@@ -3,15 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using GoalsMover.DAL.Context;
 using GoalsMover.BLL.IServices;
 using GoalsMover.DTO.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GoalsMover.Controllers
 {
+    [Authorize]
     [Route("api")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly GoalsMoverDbContext _context;
-
         private readonly IUserService _userService;
 
         public UserController(IUserService userService)
@@ -36,6 +36,20 @@ namespace GoalsMover.Controllers
             return user;
         }
 
+        [AllowAnonymous]
+        [Route("Authenticate")]
+        [HttpPost]
+        public async Task<IActionResult> Authenticate([FromBody]UserDTO user)
+        {
+            var _user = await _userService.Authenticate(user.Email);
+
+            if (_user == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
+
+            return Ok(_user);
+        }
+
+        [AllowAnonymous]
         [Route("CreateUser")]
         [HttpPost]
         public async Task<IActionResult> PostUser(UserDTO user)     

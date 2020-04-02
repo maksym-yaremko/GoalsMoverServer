@@ -1,5 +1,6 @@
 ﻿using GoalsMover.DAL.Context;
 using GoalsMover.DAL.Entities;
+using GoalsMover.DAL.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace GoalsMover.DAL.Repositories
 {
-    public class UserRepository : IRepository<User>
+    public class UserRepository : IUserRepository
     {
         private readonly GoalsMoverDbContext _dbContext;
 
@@ -53,6 +54,18 @@ namespace GoalsMover.DAL.Repositories
         public async Task Update(User user)
         {
             _dbContext.Entry(user).State = EntityState.Modified;
+        }
+
+        public async Task<User> GetByEmail(string email)
+        {
+            var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException();
+            }
+
+            return user;
         }
     }
 }

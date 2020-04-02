@@ -3,14 +3,16 @@ using GoalsMover.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GoalsMover.DAL.Migrations
 {
     [DbContext(typeof(GoalsMoverDbContext))]
-    partial class GoalsMoverDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200402181032_Add token column for the User")]
+    partial class AddtokencolumnfortheUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

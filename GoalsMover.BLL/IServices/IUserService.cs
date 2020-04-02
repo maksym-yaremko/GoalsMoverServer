@@ -14,5 +14,6 @@ namespace GoalsMover.BLL.IServices
         Task Create(UserDTO userDTO);
         Task Delete(int id);
         Task Update(UserDTO userDTO);
+        Task<User> Authenticate(string email);
     }
 }

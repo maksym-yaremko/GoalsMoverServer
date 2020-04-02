@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GoalsMover.DAL.Context;
 using GoalsMover.DAL.Entities;
+using GoalsMover.DAL.IRepositories;
 using GoalsMover.DAL.Repositories;
 
 namespace GoalsMover.DAL
@@ -15,7 +16,7 @@ namespace GoalsMover.DAL
         {
             _dbContext = dbContext;
         }
-        public IRepository<User> UserRepository => new UserRepository(_dbContext);
+        public IUserRepository UserRepository => new UserRepository(_dbContext);
 
         public void SaveChanges()
         {

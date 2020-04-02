@@ -1,4 +1,5 @@
 ﻿using GoalsMover.DAL.Entities;
+using GoalsMover.DAL.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ namespace GoalsMover.DAL
 {
     public interface IUnitOfWork
     {
-        IRepository<User> UserRepository { get; }
+        IUserRepository UserRepository { get; }
         void SaveChanges();
     }
 }
