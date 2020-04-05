@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GoalsMover.DAL.Entities
 {
@@ -9,5 +10,7 @@ namespace GoalsMover.DAL.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public string Token { get; set; }
+        public string RefreshToken { get; set; }
+        public DateTime RefreshTokenExiparionDate { get; set; }
     }
 }

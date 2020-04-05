@@ -1,7 +1,9 @@
 ﻿using GoalsMover.DAL.Entities;
 using GoalsMover.DTO.DTO;
+using GoalsMover.DTO.Model;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,9 +13,10 @@ namespace GoalsMover.BLL.IServices
     {
         Task<IEnumerable<UserDTO>> GetAll();
         Task<UserDTO> Get(int id);
-        Task Create(UserDTO userDTO);
+        Task Create(SignupModel userDTO);
         Task Delete(int id);
         Task Update(UserDTO userDTO);
-        Task<User> Authenticate(string email);
+        Task<UserDTO> Authenticate(LoginModel userModel);
+        Task<UserDTO> RefreshAccessToken(RefreshTokensModel refreshTokensModel);
     }
 }

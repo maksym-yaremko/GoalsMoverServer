@@ -4,6 +4,7 @@ using GoalsMover.DAL.Context;
 using GoalsMover.BLL.IServices;
 using GoalsMover.DTO.DTO;
 using Microsoft.AspNetCore.Authorization;
+using GoalsMover.DTO.Model;
 
 namespace GoalsMover.Controllers
 {
@@ -39,9 +40,9 @@ namespace GoalsMover.Controllers
         [AllowAnonymous]
         [Route("Authenticate")]
         [HttpPost]
-        public async Task<IActionResult> Authenticate([FromBody]UserDTO user)
+        public async Task<IActionResult> Authenticate([FromBody]LoginModel user)
         {
-            var _user = await _userService.Authenticate(user.Email);
+            var _user = await _userService.Authenticate(user);
 
             if (_user == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
@@ -50,9 +51,18 @@ namespace GoalsMover.Controllers
         }
 
         [AllowAnonymous]
+        [Route("RefreshToken")]
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken([FromBody]RefreshTokensModel tokens)
+        {
+            var user = await _userService.RefreshAccessToken(tokens);
+            return Ok(user);
+        }
+
+        [AllowAnonymous]
         [Route("CreateUser")]
         [HttpPost]
-        public async Task<IActionResult> PostUser(UserDTO user)     
+        public async Task<IActionResult> PostUser([FromBody]SignupModel user)     
         {
             await _userService.Create(user);
             return Ok();

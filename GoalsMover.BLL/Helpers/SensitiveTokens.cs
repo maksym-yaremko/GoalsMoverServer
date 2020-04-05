@@ -8,5 +8,7 @@ namespace GoalsMover.BLL.Helpers
     public class SensitiveTokens
     {
         public string SecretKey { get; set; }
+        public int AccessTokenLifetime { get; set; }
+        public int RefreshTokenLifetime { get; set; }
     }
 }

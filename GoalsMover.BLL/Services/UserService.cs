@@ -5,6 +5,7 @@ using GoalsMover.BLL.IServices;
 using GoalsMover.DAL;
 using GoalsMover.DAL.Entities;
 using GoalsMover.DTO.DTO;
+using GoalsMover.DTO.Model;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -28,34 +29,35 @@ namespace GoalsMover.BLL.Services
             _sensitiveTokens = sensitiveTokens.Value;
         }
 
-        public async Task<User> Authenticate(string email)
+        public async Task<UserDTO> Authenticate(LoginModel loginModel)
         {
-            var user = await _unitOfWork.UserRepository.GetByEmail(email);
+
+            var user = await _unitOfWork.UserRepository.GetByEmailAndPassword(loginModel.Email, loginModel.Password);
 
             if (user == null)
-                return null;
-
-            // authentication successful so generate jwt token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_sensitiveTokens.SecretKey);
-            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Email, user.Email)
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            user.Token = tokenHandler.WriteToken(token);
+                return null;
+            }
+            user.Token = AccessToken.GenerateToken(user,_sensitiveTokens);
+            user.RefreshToken = RefreshToken.GenerateToken();
+            user.RefreshTokenExiparionDate = DateTime.Today.AddDays(_sensitiveTokens.RefreshTokenLifetime);
 
-            return user.WithoutPassword();
+            await _unitOfWork.UserRepository.Update(user);
+            _unitOfWork.SaveChanges();
+
+            var userDTO = _mapper.Map<UserDTO>(user);
+
+            return userDTO;
         }
 
-        public async Task Create(UserDTO userDTO)
+        public async Task Create(SignupModel signupModel)
         {
-            var user = _mapper.Map<User>(userDTO);
+            var user = new User
+            {
+                Email = signupModel.Email,
+                Password = signupModel.Password
+            };
+
             await _unitOfWork.UserRepository.Create(user);
             _unitOfWork.SaveChanges();
         }
@@ -87,11 +89,58 @@ namespace GoalsMover.BLL.Services
             return usersDTO;
         }
 
-        public async Task Update(UserDTO userDTO)
+        public async Task<UserDTO> RefreshAccessToken(RefreshTokensModel refreshTokensModel)
         {
-            var user = _mapper.Map<User>(userDTO);
-            await _unitOfWork.UserRepository.Update(user);
-            _unitOfWork.SaveChanges();
+            var principal = Principal.GetPrincipalFromExpiredToken(refreshTokensModel.AccessToken, _sensitiveTokens);
+            var email = principal.Identity.Name;
+
+            var user = await _unitOfWork.UserRepository.GetByEmail(email);
+
+            if (user.RefreshToken != null)
+            {
+                var savedRefreshToken = user.RefreshToken;
+                if (savedRefreshToken != refreshTokensModel.RefreshToken)
+                {
+                    throw new SecurityTokenException("Invalid refresh token");
+                }
+
+                else
+                {
+                    user.Token = AccessToken.GenerateToken(user, _sensitiveTokens);
+                    if (DateTime.Now > user.RefreshTokenExiparionDate)
+                    {
+                        user.RefreshToken = RefreshToken.GenerateToken();
+                        user.RefreshTokenExiparionDate = DateTime.Today.AddDays(_sensitiveTokens.RefreshTokenLifetime);
+                    }
+
+                    await _unitOfWork.UserRepository.Update(user);
+                    _unitOfWork.SaveChanges();
+
+                    var userDTO = _mapper.Map<UserDTO>(user);
+
+                    return userDTO;
+                }
+            }
+            else
+            {
+                throw new SecurityTokenException("No refresh token id db");
+            }
+
         }
+
+        public Task Update(UserDTO userDTO)
+        {
+            throw new NotImplementedException();
+        }
+
+        //public async Task Update(EditUserModel editUserModel)
+        //{
+        //    var user = new User
+        //    {
+
+        //    };
+        //    await _unitOfWork.UserRepository.Update(user);
+        //    _unitOfWork.SaveChanges();
+        //}
     }
 }

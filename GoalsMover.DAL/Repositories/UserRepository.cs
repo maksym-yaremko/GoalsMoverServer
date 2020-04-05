@@ -56,14 +56,16 @@ namespace GoalsMover.DAL.Repositories
             _dbContext.Entry(user).State = EntityState.Modified;
         }
 
+        public async Task<User> GetByEmailAndPassword(string email,string password)
+        {
+            var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email && x.Password == password);
+
+            return user;
+        }
+
         public async Task<User> GetByEmail(string email)
         {
             var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException();
-            }
 
             return user;
         }
