@@ -40,7 +40,8 @@ namespace GoalsMover.BLL.Services
             }
             user.Token = AccessToken.GenerateToken(user,_sensitiveTokens);
             user.RefreshToken = RefreshToken.GenerateToken();
-            user.RefreshTokenExiparionDate = DateTime.Today.AddDays(_sensitiveTokens.RefreshTokenLifetime);
+            var expirationDate = DateTime.Now.AddDays(_sensitiveTokens.RefreshTokenLifetime).ToString("yyyy-MM-dd HH:mm:ss");
+            user.RefreshTokenExiparionDate = DateTime.ParseExact(expirationDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
 
             await _unitOfWork.UserRepository.Update(user);
             _unitOfWork.SaveChanges();
@@ -107,10 +108,11 @@ namespace GoalsMover.BLL.Services
                 else
                 {
                     user.Token = AccessToken.GenerateToken(user, _sensitiveTokens);
-                    if (DateTime.Now > user.RefreshTokenExiparionDate)
+                    var currentTime = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                    if (currentTime > user.RefreshTokenExiparionDate)
                     {
                         user.RefreshToken = RefreshToken.GenerateToken();
-                        user.RefreshTokenExiparionDate = DateTime.Today.AddDays(_sensitiveTokens.RefreshTokenLifetime);
+                        user.RefreshTokenExiparionDate = DateTime.Now.Date.AddDays(_sensitiveTokens.RefreshTokenLifetime);
                     }
 
                     await _unitOfWork.UserRepository.Update(user);
