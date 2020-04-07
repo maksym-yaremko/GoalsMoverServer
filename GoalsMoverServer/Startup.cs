@@ -43,7 +43,7 @@ namespace GoalsMover
             services.AddSingleton(mapper);
 
             services.AddDbContext<GoalsMoverDbContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
+            options.UseNpgsql(Configuration.GetConnectionString("DevConnection")));
 
             var appSettingsSection = Configuration.GetSection("SensitiveTokens");
             services.Configure<SensitiveTokens>(appSettingsSection);
